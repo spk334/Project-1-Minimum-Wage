@@ -1,0 +1,635 @@
+---
+title: "Final Project Part 3, version 2"
+author: "Kristie Kooken"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default    
+  word_document: default
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE , tidy = TRUE, warning = FALSE, message = FALSE)
+
+```
+
+# Questions for Part 3 of Final Project
+
+# Introduction
+
+Does raising minimum wage cause inflation? Wage push inflation theory is the idea that inflation occurs as wages are increased. In simple terms, increases in wages and then prices create a circular effect on wages where higher wages are needed to compensate due to an increase in prices and services (@wpi2022). Investigating this relationship is the purpose of my term project.
+
+In recent years, from my observations, there has been a greater gap between between those who have financial means and those who do not. As a person who has lived in an urban environment for many years, my hometown has seen dramatic housing cost increases while at the same time, campers are lining city streets as well as tents on city sidewalks. The extreme nature of these changes have been surprising to me.
+
+Last term, I began to research the topic of raising minimum wage and was very discouraged to learn that since 2009 the federal minimum wage is held at $7.25 an hour. This topic is important because without a living wage that is standardized for living above the poverty level, the divide between those that have economic means and those who do not will continue to grow with the middle class continuing to shrink. The hallmark of our society has been the ability to have social mobility which is part of our American concept of a middle class (@forbes2015). Without sustainable wages, it will not be possible for folks on the financial lower end to enable change for their circumstances. The federal minimum wage is closely tied to the ability to enact such change - a stagnant wage means family income stagnation (@epi2015). Further, this stagnation points to a greater shift where policy decisions have been made to benefit corporate owners and managers instead of low and middle class workers (@epi2015). This is a data science problem because there are many data sources but there is not one that answers this question, thus I will use a variety of sources to show the necessity of increasing minimum wage.
+
+# The problem statement addressed in this project
+
+In order to investigate if raising wages would increase inflation, I am investigating the following questions:
+
+1. What is the relationship between hourly compensation growth and productivity growth and median income
+
+2. Are there differences in median income to housing prices from past years to this year?
+  1. What is the relationship between the two variables?
+  
+3. What is the relationship between the top 0.1%, the 1% upper and the bottom earning groups and inflation
+rates? 
+  1. Do inflation rates increase as the gap between the top, the lower upper and the bottom increases over time?
+  
+4. Has the ratio between median income and median housing changed over time?
+  1. Does that change move in the same direction as changes in wages for top, middle and low earners?
+  
+5. Is there a relationship between home value change, income change and inflation rates?
+  1. Do home value change and income change predict inflation rates?
+
+
+# How I addressed this problem statement
+
+I addressed this problem statement by finding data sources on the internet about minimum wage and different variables I considered could be related such as median income, median housing prices and different measures of economic growth over time. The input data sources are described in detail below. 
+
+1.  ASPUS.xls. This is Federal Reserve Economic Data, July 26, 2022. website: <https://fred.stlouisfed.org>, from FRED Graph Observations, showing Average Sales Price of Houses Sold for the United States, Dollars, Quarterly, Not Seasonally Adjusted by year.
+    1.  There are two variables in this data, Year/Quarter (1963-2022) (numeric, continuous) and Average Sales Price of Houses Sold (numeric, continuous)
+2.  economicpolicy_prod_work.xlsx. Economic Policy Institute from February 20, 2020. website: <https://www.epi.org/publication/swa-wages-2019/>. EPI analysis of unpublished Total Economy Productivity data from the Bureau of Labor Statistics (BLS) Labor Productivity and Costs program.
+    1.  There are three variables in this data: Year (numeric, continuous), hourly compensation (as a percentage), and net productivity (as a percentage).
+3.  inflation_overtime.xlsx. The balance website, from July 27, 2022. website: <https://www.thebalance.com/u-s-inflation-rate-history-by-year-and-forecast-3306093>. U.S. Inflation Rate History and Forecast.
+    1.  There are four variables in this data: Year (numeric, continuous), Inflation Rate YOY (percentage), Fed Funds Rate (percentage), Event Affecting Inflation (character)
+4.  medianincome_tableD1.xlsx. U.S. Census Bureau, Current Population Survey, 1968 through 2021 Annual Social and Economic Supplements (CPS ASEC), SEPTEMBER 2021. website: <https://www.census.gov/data/tables/2021/demo/income-poverty/p60-273.html>. (Table 1-D from site). Historical Median Income Using Alternative Price Indices: 1967 to 2020
+    1.  Variables in this source are: Year (numeric, continuous), Current Dollars for variables Estimate, Margin of error and CPI-U-RS/current method for variables Estimate, Margin of error. I am not planning on using the similar estimate variables.
+5.  homechg_incomechg.xlsx. Real Estate Witch House Price to Income Ratio Study, 2021. website:
+    [*https://www.realestatewitch.com/house-price-to-income-ratio-2021/*](https://www.realestatewitch.com/house-price-to-income-ratio-2021/)*.* Home Value Change vs. Income Change (1965-2021)
+    1.  There are three variables in this data source: Year (numeric, continuous), Home Value Change (percentage), Income Change (percentage).
+6.  topmidbot.xlsx. Economic Policy Institute, February 20, 2020. website: <https://www.epi.org/publication/swa-wages-2019/>. Top 0.1% earnings grew 15 times as fast as 90% earnings: Cumulative percent change in real annual earnings, by earnings group, 1979--2018.
+    1.  There are four variables in the data source, Year (numeric, cumulative), Bottom 90% (percentage), Top 1% (percentage), Top 0.1% (percentage).
+
+7. latebreaker_minwage.xlsx. USA Facts, September 18, 2019. website: https://usafacts.org/articles/minimum-wage-america-how-many-people-are-earning-725-hour/?utm_source=bing&utm_medium=cpc&utm_campaign=ND-Economy&msclkid=e828e5a0aeda14c17aa9874fedeec55f. Minimum wage in America: How many people are earning $7.25 an hour?
+
+8. Actual_MW.xlsx. Wage and Hour Division, accessed August 14, 2022.
+https://www.dol.gov/agencies/whd/minimum-wage/history/chart. History of Federal Minimum Wage Rates Under the Fair Labor Standards Act, 1938 - 2009
+
+These input data sources became an analysis dataframe that was used to explore the various questions I have. 
+
+The data was read into R Studio with a minimal amount of data cleaning done in Excel. Because many sources were from government agencies, header titles and footnotes regarding the data were included. These were stripped off in order to import more easily in R. At times, a field could not be read by R due to some unreadable character in a field. In these few instances, I fixed the source excel workbook field and saved the workbook under a new name. 
+
+Six new variables were created. Values in Minimum wage variable were used to created a numeric and character dichotomous variable where each year's minimum wage was assessed to determine if it was higher or lower than the 2022 value of minimum wage. Likewise, each year's inflation rate was compared to a standard value to determine if it was higher or lower than the standard value in order to generate two dichotomous variables (character and numeric). Lastly, two variables were created as a ratio of the median housing price and the median income as well as the a ratio of the median housing price and the actual minimum wage annualized at each year. 
+
+Initially, I used exploratory data analysis and created histograms for each variable as well as correlation matrix from R package "Ggally" to get an idea of normal distribution as well as different scatter or line plots produced from the correlation matrix output. These outputs are listed under the Exploratory data analysis section of this document. 
+
+After this step, I investigated the data using descriptive statistics to better understand the characteristics for these data and identify any extreme values. 
+
+The next step I took was to look at each variable as a function of minimum wage over time or inflation rate. These analyses were a series of scatter plots by one of these two variables. 
+
+Likewise, I generated a line plot to investigate the relationship between the ratios of median housing prices and median income as well as minimum wage. 
+
+The final analysis I conducted was a Spearman's  correlation analysis across continuous variables. Spearman's correlation coefficient was used as most variables do not have a normal distribution. 
+
+The above mentioned key analyses are displayed under the section named Key analyses and plots. 
+
+Analysis that I planned but was unable to perform was the model under the planned analysis, item 5, part 1. However, it would be possible to do this analysis in two ways. 
+
+It would be possible to construct a linear regression model using inflation rate as the outcome and home value change and income change as the independent variables. Likewise, another model could be explored using a logistic regression with the outcome variable as the Y/N inflation rate along with the two independent variables of home value change and income change.   
+
+# Analysis
+
+All values from the descriptive statistics for the dataframe showed values that were within range and as expected. Since many of these data were percentages or values of income over time or housing changes over time, extreme values would represent a trend versus an entry error. 
+
+For Question 1, The relationship between hourly compensation growth and net productivity growth was r=0.814 (p<0.01). Likewise, the relationship between hourly compensation growth and median income was r=0.806 (p<0.01) while the correlation coefficient for net productivity growth and median income was r=0.997 (p<0.01). Each correlation coefficient provided here shows a strong positive relationship between the hourly compensation growth, net productivity growth and median income. 
+
+For Question 2, 
+When comparing the two scatter plots for Median Housing Prices and Median Home Sales there is a clear understanding that these data behave very similarly, though their ranges of values are different, they both have a positive upward trend and moving in even, positive increments over the years. 
+
+The correlation coefficient between median income and median housing prices is very strong (r=0.997, p<0.01) confirming this positive relationship. 
+
+For Question 3, 
+Inflation change correlated with the bottom 90% of earners was negative, (r=-0.604, p<0.01), with the top 1% was negative (r=-0.614, p<0.01) and with the top 0.1% was negative (r=-0.570, p<0.01). This negative relationship is more evident as the scatter plots are explored with inflation change have a more flat negative shape while all three earner plots show an upward trend (though the slope of trend and percentage of change between the three groups are vastly different).
+
+For Question 4,
+The ratio between median housing sales and median income has changed over time. The ratio was 4 until the mid 1980s, 5 until about 2003 and is now around 6, meaning that 6 times the median income equates the median housing value. However, this change for this 40 year period is not very different (ranging from 4 to 6) thus this ratio is essentially a flat line while the top 0.1%, the top 1% and the bottom 90% all show an increasing trend over this same time period. This is likely not the best way to compare these data as the magnitude of increase in the ratio is not shown as it is currently plotted. 
+
+Interestingly, an additional analysis was added to look at the ratio of median housing prices to median incomes as well as the ratio of median housing prices to minimum wage. The plot of this relationship show the steep positive increase of the ratio of median housing prices to minimum wage compared to the near flatness of ratio of median housing prices to median income. 
+
+For Question 5, 
+The correlation between income change and inflation rate is r=-0.499, p<0.01 while the correlation between home value change and inflation rate is r=-0.309, p=0.047. This indicates a negative relationship between income change and home value change with inflation rate.  
+
+At the time of determining my questions to analysis, I had not be able to find a good resource for minimum wage over time in 2022 dollars. However, I did locate a source and was able to add a by-year minimum wage variable. Perhaps the most critical correlation that I ran was between inflation adjusted minimum wage and inflation rate, this yield a correlation coefficient of r = 0.023, p=0.886) indicating no relationship. 
+
+# Implications
+
+The implications of these results are somewhat inconclusive. Though there is no correlation between minimum wage and inflation rate, some of the other economic indicators do not paint as clear of a picture. However, the key focus of this analysis was to demonstrate that raising wages would not create inflation. Statistically speaking, these data do not show a relationship between minimum wage and inflation rate. Likewise, the ratio of housing sales to actual minimum wage annualized paints a stark picture, initial ratio values were about 12 and increase to 25 at year 2018. This is a very important finding because the US has not kept these ratio at least similar over time (as they are for median income), this gap has become so much larger and so much more challenging to overcome. 
+
+# Limitations
+
+Limitations of this analysis is that I relied mostly on correlation and scatter plots for my interpretation when this topic needs more robust modeling. Also, I think it would be better to review each variable selection and ensure they are appropriate. Because many of my sources are government surveys, there has a been different levels of manipulation to the data. I think I would need more details on the different data manipulations order to have more confidence in the some of the variables selected (for example, the growth percentages).
+
+# Concluding Remarks
+
+This project allowed me to pull together many different aspects of R and statistics we have learned in this course. Some analyses are hampered by my beginning skill set in R but it is a very versatile statistical software package and I look forward to learning more. 
+
+
+# Key analyses and plots 
+
+```{r echo=FALSE}
+
+# read in data 
+
+setwd("C:/Users/kkooken/Documents/EDU/520/R/dsc520-1")
+
+# Setting libraries 
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+library(psych)
+library(knitr)
+library(GGally)
+library(apaTables)
+
+options(scipen = 999) 
+
+# Function needed later
+'%!in%' <- Negate("%in%")
+
+# Reading in all data sources, numbering refers to Part 1 document 
+
+# #5, Real Estate Witch House Price to Income Ratio Study, 2021
+home_in_df <- read.csv("data/finalproject/homechg_incomechg_f.csv")
+names(home_in_df)<- c("Year", "Income_change", "Home_change")
+
+# creating numeric as needed 
+home_in_df$Year <- as.numeric(home_in_df$Year)
+
+# str(home_in_df)
+
+
+# #1, This is Federal Reserve Economic Data
+# creating yr variable, creating average from quarter data
+fred_df <- read_excel("data/finalproject/ASPUS_f.xls", sheet = "Newfred")
+
+# str(fred_df)
+
+# #2, Economic Policy Institute from February 20, 2020
+ecopoly_df <- read_excel("data/finalproject/economicpolicy_prod_work_f.xlsx")
+# renaming and creating numeric as needed 
+names(ecopoly_df)<- c("Year", "Hr_comp", "Net_prod")
+ecopoly_df$Year <- as.numeric(ecopoly_df$Year)
+ecopoly_df$Hr_comp <- as.numeric(ecopoly_df$Hr_comp)
+ecopoly_df$Net_prod <- as.numeric(ecopoly_df$Net_prod)
+
+# str(ecopoly_df)
+
+# #3  U.S. Inflation Rate History and Forecast
+infl_df <- read_excel("data/finalproject/inflation_overtime_f.xlsx", sheet = "no_fmt")
+# renaming and creating numeric as needed 
+names(infl_df)<- c("Year", "Inflation_chg", "FedRate_x5", "BusCyc", "Events" )
+infl_df$Year <- as.numeric(infl_df$Year)
+
+# str(infl_df)
+
+# new inflation that starts at 1967
+infl_df2 <- filter(infl_df, Year > 1966)
+
+# creating a dichotomous variable for inflation, based on sources 5% or lower is 'normal' while greater can signify a higher inflation
+infl_df2$InflatiYN <- as.numeric(infl_df2$Inflation_chg>=5)
+infl_df2$InflatCYN <- infl_df2$Inflation_chg>=5
+
+# #4  Historical Median Income Using Alternative Price Indices: 1967 to 2020
+tabd_df <- read_excel("data/finalproject/medianincome_tableD1_f.xlsx")
+# creating numeric as needed 
+names(tabd_df)<- c("Year", "MedIncome", "MarginError")
+
+#str(tabd_df)
+
+# #6  Cumulative percent change in real annual earnings, by earnings group, 1979–2018.
+tmb_df <- read_excel("data/finalproject/topmidbot_f.xlsx")
+# renaming and creating numeric as needed 
+tmb_df$Year <- as.numeric(tmb_df$Year)
+names(tmb_df)<- c("Year", "Bot90p", "Top1p", "Top_tenthp")
+
+#str(tmb_df)
+
+# late breaking data - I found a source for minimum wage in 2019 dollars 
+minw_df <- read_excel("data/finalproject/latebreaker_minwage_f.xlsx")
+# creating numeric as needed 
+names(minw_df)<- c("Min_Wage", "Year")
+
+# late late breaker - actual minimum wage not adjusted 
+min2_df <- read_excel("data/finalproject/Actual_MW.xlsx")
+# creating numeric as needed 
+names(min2_df)<- c("Year", "Actual_MW")
+
+
+
+
+# creating a dichotomous variable for when less than or equal to 7.25 and greater than 7.25 of Min wage based on 2019 dollar valuation - where 7.25 is forwarded to 2022 and multiplied by a factor of 1.16. 
+minw_df$CURRYNN <- as.numeric(minw_df$Min_Wage>=8.41)
+minw_df$CURRYNC <- minw_df$Min_Wage>=8.41
+
+# str(minw_df)
+
+
+# merging the data together 
+# for these initial merges - using outer joins
+df1 = merge(x=ecopoly_df,y=fred_df,by="Year", all=TRUE)
+df2 = merge(x=df1,y=home_in_df,by="Year", all=TRUE)
+df3 = merge(x=df2,y=infl_df2,by="Year", all=TRUE)
+df4 = merge(x=df3,y=tabd_df,by="Year", all=TRUE)
+df5 = merge(x=df4,y=minw_df,by="Year", all=TRUE)
+df6 = merge(x=df5, y=min2_df, by="Year", all=TRUE)
+All_Outer0 = merge(x=df6,y=tmb_df,by="Year", all=TRUE)
+
+# str(All_Outer0)
+
+All_Outer <- subset(All_Outer0, select = -c(BusCyc, Events, FedRate_x5, MarginError))
+
+# str(All_Outer)
+
+# for this merges - using inner joins - this is the dataframe
+# I would use to run any combined analysis however I am interested in 
+# the outer join to better see the gaps. This dataframe is not that large 
+# so I can look at the gaps and some understanding of what is the same 
+# across variables or not 
+
+df1 = merge(x=ecopoly_df,y=fred_df,by="Year")
+df2 = merge(x=df1,y=home_in_df,by="Year")
+df3 = merge(x=df2,y=infl_df2,by="Year")
+df4 = merge(x=df3,y=tabd_df,by="Year")
+df5 = merge(x=df4,y=minw_df,by="Year")
+df6 = merge(x=df5, y=min2_df, by="Year")
+All_Inner0 = merge(x=df6,y=tmb_df,by="Year")
+
+# str(All_Inner0)
+
+# removing variables Events & BusCyc at this stage, minus c 
+
+All_Inner <- subset(All_Inner0, select = -c(BusCyc, Events, FedRate_x5, MarginError))
+
+# str(All_Inner)
+
+##########################
+####### analysis portion of final project #########
+
+# creating 2 variable that is a factor of housing prices to income and 
+# housing prices to minimum wage  
+
+All_Inner$RH2I <- round(All_Inner$Average_home_sale/All_Inner$MedIncome )
+
+All_Inner$RH2MW <- round(All_Inner$Average_home_sale/((All_Inner$Actual_MW*40)*52) )
+
+
+# Descriptive stats on the data 
+in1 <- All_Inner[,c(1,2,3,4)]
+sum1 <- summary(in1)
+
+in2 <- All_Inner[,c(5,6,7,10)]
+sum2 <- summary(in2)
+
+in3 <- All_Inner[,c(11,14,15,16)]
+sum3 <- summary(in3)
+
+in4 <- All_Inner[,c(17,18,19)]
+sum4 <- summary(in4)
+
+# colnames(All_Inner)[3] <- "In Fellowship?"
+# colnames(All_Inner)[4] <- "Ring Bearer?"
+
+kable(sum1, caption = "Descriptive Statistics for final dataframe", 'simple' )
+
+kable(sum2, caption = "Descriptive Statistics for final dataframe", 'simple' )
+
+kable(sum3, caption = "Descriptive Statistics for final dataframe ", 'simple' )
+
+kable(sum4, caption = "Descriptive Statistics for final dataframe: ", 'simple' )
+
+
+## EDA year x other variables 
+
+plot1 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Hr_comp,col=CURRYNC)) +  ggtitle("Hourly compensation by years") +  labs(caption="False = Less than $7.25 in 2022 dollars, True = Higher or equal to than $7.25 in 2022 dollars", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot1 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Percentage Increase (%)", limits=c(80, 120))
+
+
+plot2 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Net_prod,col=CURRYNC)) +  ggtitle("Net Productivity of worker by years") + labs(caption="False = Less than $7.25 in 2022 dollars, True = Higher or equal to than $7.25 in 2022 dollars", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot2 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Percentage Increase (%)", limits=c(100, 260))
+
+plot3 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Average_home_sale,col=InflatCYN)) +  ggtitle("Average Home Sale by years") + labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot3 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Average Sales Amount (USD)", limits=c(50000, 400000))
+
+plot4 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Income_change,col=CURRYNC)) +  ggtitle("Income change by years") + labs(caption="False = Less than $7.25 in 2022 dollars, True = Higher or equal to than $7.25 in 2022 dollars", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot4 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Income Change (%)", limits=c(10, 110))
+
+plot5 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Home_change,col=CURRYNC)) +  ggtitle("Home Value Change by years") + labs(caption="False = Less than $7.25 in 2022 dollars, True = Higher or equal to than $7.25 in 2022 dollars", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot5 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Home Value Change (%)", limits=c(-6, 16))
+
+plot6 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Inflation_chg,col=InflatCYN)) +  ggtitle("Inflation changes") +  labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot6 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Inflation Changes (%)", limits=c(0, 14))
+
+
+plot7 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=MedIncome,col=InflatCYN)) +  ggtitle("Median Income over years") + labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot7 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Median Income (USD)", limits=c(15000, 65000))
+
+
+plot8 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Min_Wage,col=CURRYNC)) +  ggtitle("Minimum Wage over years") + labs(caption="False = Less than $7.25 in 2022 dollars, True = Higher or equal to than $7.25 in 2022 dollars", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot8 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Minimum Wage (UDS)", limits=c(0, 14))
+
+
+plot9 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Bot90p,col=InflatCYN)) +  ggtitle("Cumulative percent change in real annual earnings for Bottom 90%") + labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot9 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Bottom 90% of earners (% change)", limits=c(-5, 400))
+
+
+plot10 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Top1p,col=InflatCYN)) +  ggtitle("Cumulative percent change in real annual earnings for Top 1% Earners") + labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot10 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Top 1% earners (% change)", limits=c(0, 400))
+
+plot11 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=Top_tenthp,col=InflatCYN)) +  ggtitle("Cumulative percent change in real annual earnings for Top 0.1%") + labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+
+# Change x and y axis labels, and limits
+plot11 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Top 0.1% earners (% change)", limits=c(0, 400))
+
+plot12 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=RH2I,col=InflatCYN)) +  ggtitle("Ratio of Median Housing to Median Income") + labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+# Change x and y axis labels, and limits
+plot12 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Median Housing/Median Income (Ratio)", limits=c(0, 10))
+
+plot13 <- ggplot(All_Inner, aes(x=Year)) + geom_point(aes(y=RH2MW,col=InflatCYN)) +  ggtitle("Ratio of Median Housing to Minimum Wage") + labs(caption="False = Inflation change less than 5%, True = Inflation change greater or equal to 5%", color = "Met criteria") 
+# Change x and y axis labels, and limits
+plot13 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3)) +
+  scale_y_continuous(name="Median Housing/ Actual Minimum Wage Annualized (Ratio)", limits=c(0, 30))
+
+# LINE PLOTS OF TWO variables 
+
+
+plotn1 <- ggplot(All_Inner, aes(x=Year)) + geom_line(aes(y=RH2I, color= "Income")) +  geom_line(aes(y=RH2MW, color="Min Wage")) +  scale_color_manual('Ratios', values=c('red', 'steelblue')) + labs( title = "Ratio of Median Housing Cost to Median Income and Ratio of Median Housing Cost to Minimum Wage over time", y = 'Ratio values' ) +  theme_minimal()
+
+plotn1 + scale_x_continuous(name="Years", breaks=seq(1979,2018,3))
+
+
+# for correlation - dropping T/F variables 
+All_InnerN <- subset(All_Inner, select = -c(InflatiYN, InflatCYN, CURRYNN, CURRYNC))
+
+# using this from Hmisc as I want to have the pvalues 
+
+Corr_tbl <- rcorr(as.matrix(All_InnerN), type=c("spearman"))
+
+Corr_tbl1 <-round(Corr_tbl[["r"]], 3)
+Corr_tbl1
+
+p_value <-round(Corr_tbl[["P"]], 3)
+p_value
+
+
+#Corr_tbl <- cor(All_InnerN, method = 'spearman')
+#apaTables::apa.cor.table(Corr_tbl,  table.number = 1)
+
+
+# visual of the correlation matrix
+ggcorr(All_InnerN, method = c("pairwise.complete.obs", "spearman")) 
+```
+
+
+
+
+
+
+
+
+
+
+# Exploratory data analyses for distribution and relationship 
+
+```{r echo=FALSE}
+# read in data 
+
+setwd("C:/Users/kkooken/Documents/EDU/520/R/dsc520-1")
+
+# Setting libraries 
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+library(psych)
+library(knitr)
+library (GGally)
+
+options(scipen = 999) 
+
+# Function needed later
+'%!in%' <- Negate("%in%")
+
+# Reading in all data sources, numbering refers to Part 1 document 
+
+# #5, Real Estate Witch House Price to Income Ratio Study, 2021
+home_in_df <- read.csv("data/finalproject/homechg_incomechg_f.csv")
+names(home_in_df)<- c("Year", "Income_change", "Home_change")
+
+# creating numeric as needed 
+home_in_df$Year <- as.numeric(home_in_df$Year)
+
+# str(home_in_df)
+
+
+# #1, This is Federal Reserve Economic Data
+# creating yr variable, creating average from quarter data
+fred_df <- read_excel("data/finalproject/ASPUS_f.xls", sheet = "Newfred")
+
+# str(fred_df)
+
+# #2, Economic Policy Institute from February 20, 2020
+ecopoly_df <- read_excel("data/finalproject/economicpolicy_prod_work_f.xlsx")
+# renaming and creating numeric as needed 
+names(ecopoly_df)<- c("Year", "Hr_comp", "Net_prod")
+ecopoly_df$Year <- as.numeric(ecopoly_df$Year)
+ecopoly_df$Hr_comp <- as.numeric(ecopoly_df$Hr_comp)
+ecopoly_df$Net_prod <- as.numeric(ecopoly_df$Net_prod)
+
+# str(ecopoly_df)
+
+# #3  U.S. Inflation Rate History and Forecast
+infl_df <- read_excel("data/finalproject/inflation_overtime_f.xlsx", sheet = "no_fmt")
+# renaming and creating numeric as needed 
+names(infl_df)<- c("Year", "Inflation_chg", "FedRate_x5", "BusCyc", "Events" )
+infl_df$Year <- as.numeric(infl_df$Year)
+
+# str(infl_df)
+
+# new inflation that starts at 1967
+infl_df2 <- filter(infl_df, Year > 1966)
+
+# creating a dichotomous variable for inflation, based on sources 5% or lower is 'normal' while greater can signify a higher inflation
+infl_df2$InflatiYN <- as.numeric(infl_df2$Inflation_chg>=5)
+infl_df2$InflatCYN <- infl_df2$Inflation_chg>=5
+
+# #4  Historical Median Income Using Alternative Price Indices: 1967 to 2020
+tabd_df <- read_excel("data/finalproject/medianincome_tableD1_f.xlsx")
+# creating numeric as needed 
+names(tabd_df)<- c("Year", "MedIncome", "MarginError")
+
+#str(tabd_df)
+
+# #6  Cumulative percent change in real annual earnings, by earnings group, 1979–2018.
+tmb_df <- read_excel("data/finalproject/topmidbot_f.xlsx")
+# renaming and creating numeric as needed 
+tmb_df$Year <- as.numeric(tmb_df$Year)
+names(tmb_df)<- c("Year", "Bot90p", "Top1p", "Top_tenthp")
+
+#str(tmb_df)
+
+# late breaking data - I found a source for minimum wage in 2019 dollars 
+minw_df <- read_excel("data/finalproject/latebreaker_minwage_f.xlsx")
+# creating numeric as needed 
+names(minw_df)<- c("Min_Wage", "Year")
+
+# creating a dichotomous variable for when less than or equal to 7.25 and greater than 7.25 of Min wage based on 2019 dollar valuation - where 7.25 is forwarded to 2022 and multiplied by a factor of 1.16. 
+minw_df$CURRYNN <- as.numeric(minw_df$Min_Wage>=8.41)
+minw_df$CURRYNC <- minw_df$Min_Wage>=8.41
+
+# str(minw_df)
+
+
+# merging the data together 
+# for these initial merges - using outer joins
+df1 = merge(x=ecopoly_df,y=fred_df,by="Year", all=TRUE)
+df2 = merge(x=df1,y=home_in_df,by="Year", all=TRUE)
+df3 = merge(x=df2,y=infl_df2,by="Year", all=TRUE)
+df4 = merge(x=df3,y=tabd_df,by="Year", all=TRUE)
+df5 = merge(x=df4,y=minw_df,by="Year")
+All_Outer0 = merge(x=df5,y=tmb_df,by="Year", all=TRUE)
+
+# str(All_Outer0)
+
+All_Outer <- subset(All_Outer0, select = -c(BusCyc, Events, FedRate_x5, MarginError))
+
+# str(All_Outer)
+
+# for this merges - using inner joins - this is the dataframe
+# I would use to run any combined analysis however I am interested in 
+# the outer join to better see the gaps. This dataframe is not that large 
+# so I can look at the gaps and some understanding of what is the same 
+# across variables or not 
+
+df1 = merge(x=ecopoly_df,y=fred_df,by="Year")
+df2 = merge(x=df1,y=home_in_df,by="Year")
+df3 = merge(x=df2,y=infl_df2,by="Year")
+df4 = merge(x=df3,y=tabd_df,by="Year")
+df5 = merge(x=df4,y=minw_df,by="Year")
+All_Inner0 = merge(x=df5,y=tmb_df,by="Year")
+
+# str(All_Inner0)
+
+# removing variables Events & BusCyc at this stage, minus c 
+
+All_Inner <- subset(All_Inner0, select = -c(BusCyc, Events, FedRate_x5, MarginError))
+
+# str(All_Inner)
+
+##########################
+####### analysis portion of final project #########
+
+# creating 2 variable that is a factor of housing prices to income and 
+# housing prices to minimum wage  
+
+All_Inner$RH2I <- round(All_Inner$Average_home_sale/All_Inner$MedIncome )
+
+All_Inner$RH2MW <- round(All_Inner$Average_home_sale/All_Inner$Min_Wage )
+
+#showing final dataframe in concise format 
+All_Inner %>%
+  slice_head(n=5) %>%
+  print.data.frame
+
+ggplot(All_Inner, aes(Year)) + geom_histogram(bins=10) + ggtitle("Distribution of Year") + xlab("Year") 
+  
+ggplot(All_Inner, aes(Hr_comp)) + geom_histogram(bins=10) + ggtitle("Distribution of Hourly Compensation Growth") + xlab("Hourly Compensation") 
+
+ggplot(All_Inner, aes(Net_prod)) + geom_histogram(bins=10) + ggtitle("Distribution of Net Productivity Growth of Worker") + xlab("Net Productivity") 
+
+ggplot(All_Inner, aes(Average_home_sale)) + geom_histogram(bins=10) + ggtitle("Distribution of Average Home Sales") + xlab("Average Home Sales") 
+
+ggplot(All_Inner, aes(Income_change)) + geom_histogram(bins=10) + ggtitle("Distribution of Income Change") + xlab("Income change") 
+
+ggplot(All_Inner, aes(Home_change)) + geom_histogram(bins=10) + ggtitle("Distribution of Home Value change") + xlab("Home Value Change") 
+
+ggplot(All_Inner, aes(Inflation_chg)) + geom_histogram(bins=10) + ggtitle("Distribution of Inflation Change") + xlab("Percentage") 
+
+ggplot(All_Inner, aes(InflatiYN)) + geom_histogram(bins=2) + ggtitle("Distribution of Inflation over 5% - 1 is Yes, 0 is No") + xlab("Yes or No") 
+
+ggplot(All_Inner, aes(MedIncome)) + geom_histogram(bins=10) + ggtitle("Distribution of Median Income") + xlab("USD")  
+
+ggplot(All_Inner, aes(Min_Wage)) + geom_histogram(bins=10) + ggtitle("Minmum Wage to 2019 Dollars") + xlab("USD") 
+
+ggplot(All_Inner, aes(Bot90p)) + geom_histogram(bins=10) + ggtitle("Distribution of Bottom 90 percent earners") + xlab("Percentages") 
+ggplot(All_Inner, aes(Top1p)) + geom_histogram(bins=10) + ggtitle("Distribution of Top 1 percent earners") + xlab("Percentage")  
+
+ggplot(All_Inner, aes(Top_tenthp)) + geom_histogram(bins=10) + ggtitle("Distribution of Top tenth percent earners") + xlab("Percentage") 
+
+ggplot(All_Inner, aes(RH2I)) + geom_histogram(bins=10) + ggtitle("Distribution of Housing to Income Factor") + xlab("Percentage")
+
+ggplot(All_Inner, aes(RH2MW)) + geom_histogram(bins=10) + ggtitle("Distribution of Top tenth percent earners") + xlab("Percentage")
+
+
+
+# for correlation - dropping T/F variables 
+All_InnerN <- subset(All_Inner, select = -c(InflatiYN, InflatCYN, CURRYNN, CURRYNC))
+
+
+# 1 is year, 7 inflation chg, 10 is min wage, I am keeping these will all runs 
+# adding hourly compensation
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 2))
+
+# adding productivity change
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 3))
+
+# adding in average home sales 
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 4))
+
+# adding in ave home sales 
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 5))
+
+# adding in income chg
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 6))
+
+# adding in median income
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 8))
+
+# adding in bottom 90%
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 10))
+
+# adding in top 1% 
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 11))
+
+# adding in top 0.1% 
+GGally::ggpairs(All_InnerN, columns = c(1, 7, 9, 12))
+
+
+
+```
+
+# References 
