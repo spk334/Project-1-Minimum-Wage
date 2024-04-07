@@ -10,7 +10,7 @@ Data sources in data folder
   7) medianincome_tableD1_f.xlsx: Median income by year
   8) Percent change of wealth, bottom, mid and top: topmidbot_f
 
-3 pdfs of the stages of EDA and final analysis 
+3 pdfs for project proposal, EDA and final analysis 
   1) Project Proposal - Project 1 proposal.pdf
   2) EDA using R - Project 1 EDA.pdf
   3) Analysis done in R using RMD
